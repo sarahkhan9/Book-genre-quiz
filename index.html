@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Genre Personality Quiz</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+
+        .progress-container {
+            margin-bottom: 30px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #eee;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: #3498db;
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            opacity: 1;
+            transition: opacity 0.3s ease;
+        }
+
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .answers {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .answer-btn {
+            background: white;
+            border: 2px solid #3498db;
+            padding: 15px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            color: #2c3e50;
+        }
+
+        .answer-btn:hover {
+            background: #3498db;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+        }
+
+        .genre-match {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .genre-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .match-percentage {
+            color: #3498db;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        .book-recommendation {
+            margin-top: 10px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .restart-btn {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            background: #2980b9;
+        }
+
+        .fade {
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Book Genre Personality Quiz</h1>
+        
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+        </div>
+
+        <div id="quiz" class="question-container">
+            <!-- Questions will be inserted here -->
+        </div>
+
+        <div id="result" class="result">
+            <h2>Your Literary Personality Profile</h2>
+            <div id="genres"></div>
+            <button class="restart-btn" onclick="restartQuiz()">Take Quiz Again</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                question: "How do you prefer to spend your free time?",
+                answers: [
+                    { text: "Exploring new places", traits: { adventure: 2, fantasy: 1, mystery: 1 } },
+                    { text: "Thinking and reflecting", traits: { literary: 2, philosophy: 2, historical: 1 } },
+                    { text: "Solving puzzles", traits: { mystery: 2, thriller: 1, scifi: 1 } },
+                    { text: "Daydreaming", traits: { fantasy: 2, romance: 1, literary: 1 } }
+                ]
+            },
+            {
+                question: "What interests you most in a story?",
+                answers: [
+                    { text: "Complex characters", traits: { literary: 2, historical: 1, romance: 1 } },
+                    { text: "Exciting plot twists", traits: { thriller: 2, mystery: 1, adventure: 1 } },
+                    { text: "Imaginative worlds", traits: { fantasy: 2, scifi: 2 } },
+                    { text: "Deep meanings", traits: { philosophy: 2, literary: 1, historical: 1 } }
+                ]
+            },
+            {
+                question: "What's your ideal setting for a story?",
+                answers: [
+                    { text: "A distant future", traits: { scifi: 2, fantasy: 1 } },
+                    { text: "The historical past", traits: { historical: 2, literary: 1 } },
+                    { text: "The present day", traits: { thriller: 1, mystery: 1, romance: 2 } },
+                    { text: "A magical realm", traits: { fantasy: 2, adventure: 1 } }
+                ]
+            },
+            {
+                question: "What emotion do you seek most in books?",
+                answers: [
+                    { text: "Excitement", traits: { adventure: 2, thriller: 1, mystery: 1 } },
+                    { text: "Wonder", traits: { fantasy: 2, scifi: 1, philosophy: 1 } },
+                    { text: "Understanding", traits: { literary: 2, philosophy: 1, historical: 1 } },
+                    { text: "Romance", traits: { romance: 2, historical: 1 } }
+                ]
+            },
+            {
+                question: "What's your approach to life's challenges?",
+                answers: [
+                    { text: "Analyze and solve", traits: { mystery: 2, thriller: 1, scifi: 1 } },
+                    { text: "Face them head-on", traits: { adventure: 2, thriller: 1 } },
+                    { text: "Reflect and learn", traits: { philosophy: 2, literary: 1, historical: 1 } },
+                    { text: "Trust your heart", traits: { romance: 2, fantasy: 1 } }
+                ]
+            }
+        ];
+
+        const genres = {
+            adventure: {
+                name: "Adventure",
+                description: "You're drawn to exciting journeys and bold challenges.",
+                recommendation: "Try 'The Lost City of Z' by David Grann"
+            },
+            fantasy: {
+                name: "Fantasy",
+                description: "You have a vivid imagination and love magical possibilities.",
+                recommendation: "Try 'The Name of the Wind' by Patrick Rothfuss"
+            },
+            mystery: {
+                name: "Mystery",
+                description: "You enjoy solving puzzles and uncovering secrets.",
+                recommendation: "Try 'The Seven Deaths of Evelyn Hardcastle' by Stuart Turton"
+            },
+            scifi: {
+                name: "Science Fiction",
+                description: "You're fascinated by future possibilities and scientific concepts.",
+                recommendation: "Try 'Project Hail Mary' by Andy Weir"
+            },
+            literary: {
+                name: "Literary Fiction",
+                description: "You appreciate deep character development and meaningful themes.",
+                recommendation: "Try 'The Heart's Invisible Furies' by John Boyne"
+            },
+            historical: {
+                name: "Historical Fiction",
+                description: "You're interested in different time periods and human nature.",
+                recommendation: "Try 'The Seven Husbands of Evelyn Hugo' by Taylor Jenkins Reid"
+            },
+            philosophy: {
+                name: "Philosophy",
+                description: "You enjoy contemplating deep questions about life and existence.",
+                recommendation: "Try 'Sophie's World' by Jostein Gaarder"
+            },
+            romance: {
+                name: "Romance",
+                description: "You value emotional connections and relationship dynamics.",
+                recommendation: "Try 'The Invisible Life of Addie LaRue' by V.E. Schwab"
+            },
+            thriller: {
+                name: "Thriller",
+                description: "You enjoy suspense and psychological tension.",
+                recommendation: "Try 'The Silent Patient' by Alex Michaelides"
+            }
+        };
+
+        let currentQuestion = 0;
+        let traits = {};
+
+        // Initialize trait scores
+        for (let genre in genres) {
+            traits[genre] = 0;
+        }
+
+        function displayQuestion() {
+            const quizContainer = document.getElementById('quiz');
+            const question = questions[currentQuestion];
+            
+            let html = `
+                <div class="question">${question.question}</div>
+                <div class="answers">
+                    ${question.answers.map((answer, index) => `
+                        <button class="answer-btn" onclick="selectAnswer(${index})">${answer.text}</button>
+                    `).join('')}
+                </div>
+            `;
+            
+            quizContainer.classList.add('fade');
+            setTimeout(() => {
+                quizContainer.innerHTML = html;
+                quizContainer.classList.remove('fade');
+            }, 300);
+
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        function selectAnswer(answerIndex) {
+            const answer = questions[currentQuestion].answers[answerIndex];
+            
+            // Update trait scores
+            for (let trait in answer.traits) {
+                traits[trait] = (traits[trait] || 0) + answer.traits[trait];
+            }
+
+            currentQuestion++;
+
+            if (currentQuestion < questions.length) {
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quiz').style.display = 'none';
+            
+            // Calculate percentages
+            const maxScore = Math.max(...Object.values(traits));
+            const genreMatches = Object.entries(traits)
+                .map(([genre, score]) => ({
+                    genre,
+                    percentage: Math.round((score / maxScore) * 100)
+                }))
+                .sort((a, b) => b.percentage - a.percentage);
+
+            // Display top 3 matches
+            const resultHtml = genreMatches.slice(0, 3).map(match => `
+                <div class="genre-match">
+                    <div class="genre-title">${genres[match.genre].name}</div>
+                    <div class="match-percentage">${match.percentage}% Match</div>
+                    <p>${genres[match.genre].description}</p>
+                    <div class="book-recommendation">
+                        <strong>Recommended Book:</strong><br>
+                        ${genres[match.genre].recommendation}
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('genres').innerHTML = resultHtml;
+            document.getElementById('result').style.display = 'block';
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            traits = {};
+            for (let genre in genres) {
+                traits[genre] = 0;
+            }
+            document.getElementById('result').style.display = 'none';
+            document.getElementById('quiz').style.display = 'block';
+            displayQuestion();
+        }
+
+        // Start the quiz
+        displayQuestion();
+    </script>
+</body>
+</html>
